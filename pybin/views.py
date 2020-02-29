@@ -6,8 +6,10 @@ import typing
 
 import pytz
 from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
+from pyhatebin import settings
 from .models import Paste, ExpiredPasteError
 
 
@@ -153,6 +155,12 @@ def clean_pastes_view(request):
     })
 
 
+def index_view(request):
+    if not settings.DEBUG:
+        raise Http404()
+    return HttpResponse(''.join(open('static/index.html', 'r').readlines()))
+
+
 def about_view(request):
     return HttpResponse('''
 <html lang="en">
@@ -175,3 +183,32 @@ Pybin is a small pastebin made to replace haste-server
 
 </html>
 ''')
+
+
+@csrf_exempt
+def json_paste_view(request, paste_id):
+    r = _ensure_method(request)
+    if r:
+        return r
+
+    try:
+        return JsonResponse({
+            'data': Paste.get(paste_id).text,
+            'key': paste_id
+        })
+    except Paste.DoesNotExist:
+        resp = JsonResponse({
+            'status': 404,
+            'message': 'Not found.'
+        })
+        resp.status_code = 404
+        resp.reason_phrase = 'Not found.'
+        return resp
+    except ExpiredPasteError:
+        resp = JsonResponse({
+            'status': 410,
+            'message': 'Gone, paste has expired.'
+        })
+        resp.status_code = 410
+        resp.reason_phrase = 'Gone'
+        return resp
