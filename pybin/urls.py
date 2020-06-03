@@ -7,6 +7,7 @@ urlpatterns = [
     path('raw/<slug:paste_id>', views.raw_paste_view),
     path('delete/<slug:paste_id>/<slug:deletion_key>', views.delete_paste_view),
     path('documents', views.create_paste_view),
+    path('documents/', views.create_paste_view),
     path('documents/<slug:paste_id>', views.json_paste_view),
     path('create', views.create_paste_view),
     path('create/<slug:delete_key>', views.create_paste_view),
@@ -22,7 +23,7 @@ urlpatterns = [
             lambda r, match: views.index_view(r)),
 ]
 
-if settings.DEBUG:  # host these files on your own :)
+if settings.DEBUG_ROUTES:  # host these files on your own :)
     from . import debug_views
 
     urlpatterns += [

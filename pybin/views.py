@@ -6,10 +6,8 @@ import typing
 
 import pytz
 from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from pyhatebin import settings
 from .models import Paste, ExpiredPasteError
 
 
@@ -67,7 +65,7 @@ def raw_paste_view(request, paste_id):
         return r
 
     try:
-        return HttpResponse(Paste.get(paste_id).text)
+        return HttpResponse(Paste.get(paste_id).text, content_type='text/plain')
     except Paste.DoesNotExist:
         resp = JsonResponse({
             'status': 404,
@@ -156,14 +154,11 @@ def clean_pastes_view(request):
 
 
 def index_view(request):
-    if not settings.DEBUG:
-        raise Http404()
     return HttpResponse(''.join(open('static/index.html', 'r').readlines()))
 
 
 def about_view(request):
-    return HttpResponse('''
-<html lang="en">
+    return HttpResponse('''<html lang="en">
 
 <head>
     <title>hastebin</title>
@@ -174,11 +169,28 @@ def about_view(request):
     <meta name="robots" content="noindex,nofollow"/>
 </head>
 
-<h1>Make this file static in prod, /about</h1>
-
 <body style="color:#aaa;">
 <h3>Pybin</h3>
 Pybin is a small pastebin made to replace haste-server
+
+<h2>Differences</h2>
+<ol>
+    <li>
+        Deleting pastes is now possible,
+        When creating a paste a new key is returned: <em>delete_key</em>.
+        You can use it with the new delete endpoint (<em>/delete/PASTE_ID/DELETE_KEY</em>) to delete a paste
+    </li>
+    <li>
+        You can use <em>POST|PUT /create</em> url instead of <em>POST|PUT /documents</em>.
+    </li>
+    <li>
+        With <em>/create/DELETE_KEY</em> you can specify your own delete key instead of a random one.
+    </li>
+    <li>
+        On <em>/documents</em> and <em>/create</em> you can now specify <em>?expire_time=ISO_FORMATTED_DATETIME</em> to 
+        set an expiration time of the paste.
+    </li>
+</ol>
 </body>
 
 </html>

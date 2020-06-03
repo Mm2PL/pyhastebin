@@ -20,7 +20,7 @@ haste_document.prototype.htmlEscape = function(s) {
 haste_document.prototype.load = function(key, callback, lang) {
   var _this = this;
   var request = new XMLHttpRequest();
-  request.open('GET', '/documents/' + key, true);
+  request.open('GET', '/haste/documents/' + (key.replace('haste/', '')), true);
 
   request.onreadystatechange = function() {
     if (this.readyState === 4) {
@@ -67,7 +67,7 @@ haste_document.prototype.save = function(data, callback) {
   this.data = data;
   var _this = this;
   var request = new XMLHttpRequest();
-  request.open('POST', '/documents', true);
+  request.open('POST', '/haste/documents', true);
   request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
   request.send(data);
 
@@ -161,7 +161,7 @@ haste.prototype.newDocument = function(hideHistory) {
   this.box.style.display = 'none';
   this.doc = new haste_document();
   if (!hideHistory) {
-    window.history.pushState(null, this.appName, '/');
+    window.history.pushState(null, this.appName, '/haste/');
   }
   this.setTitle();
   this.lightKey();
@@ -259,7 +259,7 @@ haste.prototype.lockDocument = function() {
     else if (ret) {
       _this.code.innerHTML = ret.value;
       _this.setTitle(ret.key);
-      var file = '/' + ret.key;
+      var file = '/haste/' + ret.key;
       if (ret.language) {
         file += '.' + _this.lookupExtensionByType(ret.language);
       }
@@ -320,7 +320,7 @@ haste.prototype.configureButtons = function() {
       },
       shortcutDescription: 'control + shift + r',
       action: function() {
-        window.location.href = '/raw/' + _this.doc.key;
+        window.location.href = '/haste/raw/' + _this.doc.key;
       }
     },
     {
@@ -419,7 +419,7 @@ haste.prototype.setupTabHandling = function() {
 (function() {
   app = new haste('hastebin', { twitter: true });
   var path = window.location.pathname;
-  if (path === '/') {
+  if (path === '/haste/') {
     app.newDocument(true);
   } else {
     app.loadDocument(path.substring(1, path.length));
