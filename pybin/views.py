@@ -154,6 +154,9 @@ def clean_pastes_view(request):
 
 
 def index_view(request):
+    ua = request.headers['User-Agent']
+    if ua.startswith('curl') or ua.startswith('Wget'):
+        return raw_paste_view(request)
     return HttpResponse(''.join(open('static/index.html', 'r').readlines()))
 
 
